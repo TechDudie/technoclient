@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+body {
+    background-color: #222426;
+    text-align: center;
+}
+
+span {
+    font-family: 'Ubuntu Mono', monospace;
+    font-weight: 700;
+
+    color: #2266ff;
+}
+
+button > span, select > span, select {
+    color: #ffffff;
+}
+
+#header {
+    font-size: 48px;
+    margin-bottom: 40px;
+}
+
+#subheader {
+    font-size: 24px;
+}
+
+button, select {
+    background-color: #00aaff;
+    border: none;
+    text-decoration: none;
+    text-align: center;
+
+    clip-path: polygon(
+        0 10px,
+        15px 0,
+        100% 0,
+        100% calc(100% - 10px),
+        calc(100% - 15px) 100%,
+        0% 100%
+    )
+}
+
+#top, #singleplayer, #multiplayer, #bottom {
+    width: 60%;
+    margin-top: 30px;
+}
+
+#top {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#play, #version, #settings, #quit {
+    height: 36px;
+    position: absolute;
+}
+
+#play {
+    width: 56%;
+    left: 16%;
+}
+
+#version {
+    width: 10%;
+    right: 16%;
+}
+
+#settings {
+    width: 33%;
+    left: 16%;
+}
+
+#quit {
+    width: 33%;
+    right: 16%;
+}
