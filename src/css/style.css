@@ -3,6 +3,8 @@
 body {
     background-color: #222426;
     text-align: center;
+
+    user-select: none;
 }
 
 span {
@@ -14,6 +16,10 @@ span {
 
 button > span, select > span, select {
     color: #ffffff;
+}
+
+button:hover, select:hover {
+    background-color: #00bb54;
 }
 
 #header {
@@ -38,7 +44,9 @@ button, select {
         100% calc(100% - 10px),
         calc(100% - 15px) 100%,
         0% 100%
-    )
+    );
+
+    transition: background-color 0.5s;
 }
 
 #top, #singleplayer, #multiplayer, #bottom {
@@ -51,7 +59,7 @@ button, select {
     margin-right: auto;
 }
 
-#play, #version, #settings, #quit {
+#play, #version, #servers, #settings, #quit {
     height: 36px;
     position: absolute;
 }
@@ -64,6 +72,11 @@ button, select {
 #version {
     width: 10%;
     right: 16%;
+}
+
+#servers {
+    width: 68%;
+    left: 16%;
 }
 
 #settings {
