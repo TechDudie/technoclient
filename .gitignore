@@ -1,2 +1,13 @@
+# nodejs
 /node_modules
 out/
+
+# python
+__pycache__/
+*.py[cod]
+
+
+# pyinstaller
+main.spec
+/build
+/dist
