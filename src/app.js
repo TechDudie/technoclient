@@ -14,7 +14,7 @@ function setupWindow() {
 
     root.removeMenu()
 
-    // root.webContents.openDevTools() // only for when I'm a stupidhead :/
+    // root.webContents.openDevTools()
 }
 
 app.whenReady().then(() => {

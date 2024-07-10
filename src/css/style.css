@@ -7,28 +7,7 @@ body {
     user-select: none;
 }
 
-span {
-    font-family: "Share Tech Mono", monospace;
-
-    color: #2266ff;
-}
-
-button > span, select > span, select {
-    color: #ffffff;
-}
-
-button:hover, select:hover {
-    background-color: #00bb54;
-}
-
-#header {
-    font-size: 48px;
-    margin-bottom: 40px;
-}
-
-#subheader {
-    font-size: 24px;
-}
+/* generic element styling */
 
 button, select {
     background-color: #00aaff;
@@ -46,6 +25,41 @@ button, select {
     );
 
     transition: background-color 0.5s;
+}
+
+button:hover, select:hover {
+    background-color: #00bb54;
+}
+
+span {
+    font-family: "Share Tech Mono", monospace;
+
+    color: #2266ff;
+}
+
+button > span, select > span, select {
+    color: #ffffff;
+}
+
+/* screens */
+
+.screen {
+    display: none;
+}
+
+#_main {
+    display: block;
+}
+
+/* _main element styling */
+
+#header {
+    font-size: 48px;
+    margin-bottom: 40px;
+}
+
+#subheader {
+    font-size: 24px;
 }
 
 #top, #singleplayer, #multiplayer, #bottom {
@@ -86,4 +100,15 @@ button, select {
 #quit {
     width: 33%;
     right: 16%;
+}
+
+/* _multiplayer element styling */
+
+.back {
+    height: 32px;
+    width: 12%;
+
+    position: absolute;
+    left: 4%;
+    bottom: 4%;
 }
