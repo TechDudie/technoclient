@@ -1,4 +1,5 @@
 const { app, BrowserWindow } = require('electron')
+const ipc = require('electron').ipcMain
 const path = require('node:path')
 
 function setupWindow() {
@@ -6,7 +7,9 @@ function setupWindow() {
         width: 854,
         height: 512,
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js')
+            preload: path.join(__dirname, 'preload.js'),
+            nodeIntegration: true,
+            contextIsolation: false
         }
     })
 
@@ -28,3 +31,7 @@ app.whenReady().then(() => {
 app.on('window-all-closed', function () {
     app.quit()
 })
+
+ipc.on('quit', () => {
+    app.quit()
+});

@@ -112,3 +112,71 @@ button > span, select > span, select {
     left: 4%;
     bottom: 4%;
 }
+
+.server {
+    height: 120px;
+    width: 84%;
+
+    background-color: #3f464f;
+    border-radius: 8px;
+
+    position: absolute;
+    left: 8%;
+    right: 8%;
+
+    margin-top: 20px;
+}
+
+.server_icon {
+    height: 100px;
+    width: 100px;
+
+    image-rendering: pixelated;
+
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    bottom: 10px;
+}
+
+.server_name {
+    font-size: 40px;
+
+    position: absolute;
+    top: 10px;
+    left: 120px;
+}
+
+.server_ip {
+    font-size: 15px;
+
+    position: absolute;
+    top: 65px;
+    left: 120px;
+}
+
+.server_version {
+    font-size: 15px;
+
+    position: absolute;
+    top: 85px;
+    left: 120px;
+}
+
+.server_edit {
+    height: 28px;
+    width: 10%;
+
+    position: absolute;
+    right: calc(10% + 25px);
+    bottom: 10px;
+}
+
+.server_join {
+    height: 28px;
+    width: 10%;
+
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+}

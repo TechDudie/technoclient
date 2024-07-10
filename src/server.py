@@ -16,15 +16,6 @@ def default():
                 "favicon": "",
             },
             {
-                "name": "Hypixel Skyblock",
-                "ip": "mc.hypixel.net",
-                "version": "1.8.9-skyblock",
-                "ping": -1,
-                "playercount": (0, 0),
-                "players": [],
-                "favicon": ""
-            },
-            {
                 "name": "Wynncraft",
                 "ip": "play.wynncraft.com",
                 "version": "1.21-wynncraft",
@@ -60,8 +51,6 @@ def refresh():
             server["ping"] = query.ping()
         except OSError:
             server["ping"] = -1
-        
-        print(status)
 
         try:
             server["playercount"] = (status["players"]["online"], status["players"]["max"])
