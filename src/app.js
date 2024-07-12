@@ -1,6 +1,10 @@
 const { app, BrowserWindow } = require('electron')
-const ipc = require('electron').ipcMain
 const path = require('node:path')
+
+const ipc = require('./ipc.js')
+const readServerList = require('./serverlist.js')
+
+const devTools = false
 
 function setupWindow() {
     const root = new BrowserWindow({
@@ -17,21 +21,25 @@ function setupWindow() {
 
     root.removeMenu()
 
-    // root.webContents.openDevTools()
+    if (devTools) {
+        root.webContents.openDevTools()
+    }
+
+    return root
 }
 
 app.whenReady().then(() => {
-    setupWindow()
+    let root = setupWindow()
 
     app.on('activate', function () {
         if (BrowserWindow.getAllWindows().length === 0) setupWindow()
     })
+
+    ipc.initializeIPC(root)
+
+    readServerList()
 })
 
 app.on('window-all-closed', function () {
     app.quit()
 })
-
-ipc.on('quit', () => {
-    app.quit()
-});

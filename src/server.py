@@ -18,17 +18,17 @@ def default():
             {
                 "name": "Wynncraft",
                 "ip": "play.wynncraft.com",
-                "version": "1.21-wynncraft",
+                "version": "1.20.2-wynncraft",
                 "ping": -1,
                 "playercount": (0, 0),
                 "players": [],
                 "favicon": ""
             },
         ]
-    }, open(root() / "servers.json", "w"))
+    }, open(root() / "serverlist.json", "w"))
 
 def refresh():
-    servers = json.load(open(root() / "servers.json"))
+    servers = json.load(open(root() / "serverlist.json"))
 
     # TODO: multithreaded server query
     for i, server in enumerate(servers["servers"]):
@@ -74,6 +74,6 @@ def refresh():
 
         servers["servers"][i] = server
     
-    json.dump(servers, open(root() / "servers.json", "w"))
+    json.dump(servers, open(root() / "serverlist.json", "w"))
 
-    log("Updated servers.json")
+    log("Updated serverlist.json")

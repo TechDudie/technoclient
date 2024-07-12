@@ -31,13 +31,13 @@ button:hover, select:hover {
     background-color: #00bb54;
 }
 
-span {
+span, select, option {
     font-family: "Share Tech Mono", monospace;
 
     color: #2266ff;
 }
 
-button > span, select > span, select {
+button > span, select, option {
     color: #ffffff;
 }
 
