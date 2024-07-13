@@ -1,23 +1,30 @@
-const { app } = require('electron')
+const app = require('electron')
 const ipc = require('electron').ipcMain
+const window = require('electron').BrowserWindow;
 
-let root = null;
+const readServerList = require('./serverlist.js');
 
 module.exports = {
     initializeIPC: initializeIPC,
     sendIPC: sendIPC
 }
 
-function initializeIPC(window) {
-    root = window;
-
+function initializeIPC() {
     // define ipc listeners here
 
     ipc.on('quit', () => {
         app.quit()
     });
+
+    ipc.on('screen', (event, screen) => {
+        console.log("window changed")
+        if (screen == "_multiplayer") {
+            sendIPC("serverlist", readServerList())
+        }
+    })
 }
 
 function sendIPC(channel, data) {
-    root.webContents.send(channel, data);
+    console.log("crap sent")
+    window.getFocusedWindow().webContents.send(channel, data)
 }

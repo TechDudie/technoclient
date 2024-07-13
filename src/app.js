@@ -2,9 +2,9 @@ const { app, BrowserWindow } = require('electron')
 const path = require('node:path')
 
 const ipc = require('./ipc.js')
-const readServerList = require('./serverlist.js')
 
-const devTools = false
+let devTools = false
+devTools = true
 
 function setupWindow() {
     const root = new BrowserWindow({
@@ -35,9 +35,7 @@ app.whenReady().then(() => {
         if (BrowserWindow.getAllWindows().length === 0) setupWindow()
     })
 
-    ipc.initializeIPC(root)
-
-    readServerList()
+    ipc.initializeIPC()
 })
 
 app.on('window-all-closed', function () {
