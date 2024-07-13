@@ -17,7 +17,6 @@ function initializeIPC() {
     });
 
     ipc.on('screen', (event, screen) => {
-        console.log("window changed")
         if (screen == "_multiplayer") {
             sendIPC("serverlist", readServerList())
         }
@@ -25,6 +24,5 @@ function initializeIPC() {
 }
 
 function sendIPC(channel, data) {
-    console.log("crap sent")
     window.getFocusedWindow().webContents.send(channel, data)
 }

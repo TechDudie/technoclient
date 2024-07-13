@@ -4,7 +4,7 @@ const path = require('node:path')
 const ipc = require('./ipc.js')
 
 let devTools = false
-devTools = true
+// devTools = true
 
 function setupWindow() {
     const root = new BrowserWindow({

@@ -41,7 +41,6 @@ Array.from(document.getElementsByClassName("back")).forEach((element) => {
 // serverlist
 
 ipc.on("serverlist", (event, data) => {
-    console.log("crap received")
     data.forEach((server) => {e("serverlist").innerHTML += `<div class="server">
     <img class="server_icon" src="${server["favicon"]}">
     <span class="server_name">${server["name"]}</span>
