@@ -32,7 +32,9 @@ app.whenReady().then(() => {
     let root = setupWindow()
 
     app.on('activate', function () {
-        if (BrowserWindow.getAllWindows().length === 0) setupWindow()
+        if (BrowserWindow.getAllWindows().length === 0) {
+            root = setupWindow()
+        }
     })
 
     ipc.initializeIPC()
