@@ -41,6 +41,7 @@ Array.from(document.getElementsByClassName("back")).forEach((element) => {
 // serverlist
 
 ipc.on("serverlist", (event, data) => {
+    e("serverlist").innerHTML = ""
     let i = 0
 
     data.forEach((server) => {
