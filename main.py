@@ -1,6 +1,8 @@
 import argparse
+import requests
 
 import src.server as server
+import src.java as java
 
 from src.util import *
 
@@ -21,6 +23,11 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "-p", "--proxy",
+        type=str
+    )
+
+    parser.add_argument(
         "module",
         type=str
     )
@@ -30,7 +37,17 @@ if __name__ == "__main__":
         type=str
     )
 
+    parser.add_argument(
+        "version",
+        type=str
+    )
+
     args = parser.parse_args()
+
+    if args.proxy:
+        s = requests.Session(proxies={"http": f"socks5h://{args.proxy}", "https": f"socks5h://{args.proxy}", "socks5": f"socks5h://{args.proxy}"})
+    else:
+        s = requests.Session()
 
     match args.module:
         
@@ -38,7 +55,12 @@ if __name__ == "__main__":
             match args.action:
                 case "refresh":
                     server.refresh()
-                
+        
+        case "java":
+            match args.action:
+                case "install":
+                    java.install(args.version, s)
+
                 case _:
                     log("Invalid action specified", "ERROR")
 
