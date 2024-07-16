@@ -2,6 +2,7 @@ import argparse
 import requests
 
 import src.server as server
+import src.version as version
 import src.java as java
 
 from src.util import *
@@ -39,7 +40,9 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "version",
-        type=str
+        type=str,
+        nargs="?",
+        default=""
     )
 
     args = parser.parse_args()
@@ -55,6 +58,11 @@ if __name__ == "__main__":
             match args.action:
                 case "refresh":
                     server.refresh()
+        
+        case "metadata":
+            match args.action:
+                case "update":
+                    version.run(args.version, s)
         
         case "java":
             match args.action:
