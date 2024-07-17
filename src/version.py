@@ -1,3 +1,4 @@
+import json
 import shutil
 import zipfile
 
@@ -29,5 +30,10 @@ def run(version, session):
 
     shutil.move(path / "meta-launcher-master", target)
     log(f"Extracted contents to {target}")
+
+    log("Downloading asset index")
+    data = json.load(open(root() / "meta" / "net.minecraft" / f"{version.split("-")[0]}.json"))["assetIndex"]
+    download(session, data["url"], root() / "assets" / "indexes" / f"{data["id"]}.json", data["sha1"])
+    log("Asset index downloaded")
 
     log(f"Minecraft metadata downloaded{" (REPO@github)".replace("REPO", "/".join(META_URL.split("/")[3:5]) ) if META_URL.startswith("https://github.com") else ""}")

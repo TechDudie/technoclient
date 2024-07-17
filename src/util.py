@@ -41,8 +41,11 @@ def download(session, url, path, sha1=None) -> int:
             file.write(r.content)
     else:
         log(f"Failed to download {url} to {path}", "ERROR")
+        return 2
     
     if sha1:
         with open(path, "rb") as file:
             if not hashlib.sha1(file.read()).hexdigest() == sha1:
                 log(f"SHA1 hash of downloaded file {path} does not match {url}", "ERROR")
+                return 1
+            return 0
