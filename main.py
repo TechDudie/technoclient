@@ -1,9 +1,10 @@
 import argparse
 import requests
 
+import src.assets as assets
+import src.java as java
 import src.server as server
 import src.version as version
-import src.java as java
 
 from src.util import *
 
@@ -63,6 +64,11 @@ if __name__ == "__main__":
             match args.action:
                 case "update":
                     version.run(args.version, s)
+        
+        case "assets":
+            match args.action:
+                case "install":
+                    assets.run(args.version, s)
         
         case "java":
             match args.action:
