@@ -23,7 +23,7 @@ def log(text: str, level="INFO") -> None:
         log("Terminating")
         exit(1)
 
-def download(session, url, path, sha1=None) -> int:
+def download(session, url, path, sha1=None, quiet=False) -> int:
     if pathlib.Path(path).exists():
         if sha1:
             with open(path, "rb") as file:
@@ -33,7 +33,8 @@ def download(session, url, path, sha1=None) -> int:
                 else:
                     log(f"{path} present with incorrect checksum, redownloading")
     
-    log(f"Downloading {url} to {path}" + f" (sha1: {sha1})" if sha1 else "")
+    if not quiet:
+        log(f"Downloading {url} to {path}" + (f" (sha1: {sha1})" if sha1 else ""))
     r = session.get(url)
     if r.status_code == 200:
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -49,3 +50,5 @@ def download(session, url, path, sha1=None) -> int:
                 log(f"SHA1 hash of downloaded file {path} does not match {url}", "ERROR")
                 return 1
             return 0
+    
+    return 0

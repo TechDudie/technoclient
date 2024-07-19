@@ -35,7 +35,7 @@ def download_callback(status):
     i += 1
     j += delta
 
-    print(f"Downloading assets   {str(round(j * 100)).rjust(3, ' ')}% [{('/' * int(j * (WIDTH - 28))).ljust(WIDTH - 28, ' ')}]", end="\r")
+    print(f"Downloading assets    {str(round(j * 100)).rjust(3, ' ')}% [{('/' * int(j * (WIDTH - 29))).ljust(WIDTH - 29, ' ')}]", end="\r")
 
 def verify_callback(status):
     global i, j, delta
@@ -45,13 +45,18 @@ def verify_callback(status):
     if status[0] != 0:
         download(status[1])
     
-    print(f"Verifying assets     {str(round(j * 100)).rjust(3, ' ')}% [{('/' * int(j * (WIDTH - 28))).ljust(WIDTH - 28, ' ')}]", end="\r")
+    print(f"Verifying assets      {str(round(j * 100)).rjust(3, ' ')}% [{('/' * int(j * (WIDTH - 29))).ljust(WIDTH - 29, ' ')}]", end="\r")
 
 def run(version, session):
     v = version.split("-")[0]
     id = json.loads(open(root() / "meta" / "net.minecraft" / f"{v}.json").read())['assetIndex']['id']
     asset_data = json.loads(open(root() / "assets" / "indexes" / f"{id}.json").read())["objects"]
-    data = [(f"{ASSET_URL}/{asset['hash'][:2]}/{asset['hash']}", root() / "assets" / "objects" / asset['hash'][:2] / asset['hash'], asset["hash"], session) for asset in asset_data.values()]
+    data = [(
+        f"{ASSET_URL}/{asset['hash'][:2]}/{asset['hash']}",
+        root() / "assets" / "objects" / asset['hash'][:2] / asset['hash'],
+        asset["hash"],
+        session
+    ) for asset in asset_data.values()]
 
     # for reference each asset is formatted as (url, path, hash, session)
 
