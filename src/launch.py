@@ -5,8 +5,11 @@ import re
 import subprocess
 import sys
 
+# reminder to self: just copy of launchcraft version, not fixed up yet
+# reminder to self x2: this is python 3.12 there are match case statements now
+
 USERNAME = "TechnoDot"
-UUID = "9a467ecf8eaf4d9cb44050eb9b60581a"
+UUID = "9a467ecf8eaf4d9cb44050eb9b60581a" # long live my old account
 TOKEN = "eynevergonnagiveyouupnevergonnaletyoudownnevergonnarunaroundanddesertyou"
 
 def parse_rule(rule, options) -> bool:
