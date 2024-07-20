@@ -18,9 +18,10 @@ def run(version, session):
     path = root() / "cache" / "meta"
     target = root() / "meta"
 
-    if (time.time() - os.path.getmtime(cache)) < 600 or not os.path.exists(cache):
+    if not os.path.exists(cache) or (time.time() - os.path.getmtime(cache)) < 600:
         r = session.get(META_URL)
         if r.status_code == 200:
+            os.makedirs(os.path.dirname(cache), exist_ok=True)
             with open(cache, "wb") as file:
                 file.write(r.content)
         else:
