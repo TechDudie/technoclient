@@ -10,7 +10,7 @@ import zipfile
 
 from src.util import *
 
-ARCH = {"X86_64": "x64", "AMD64": "x64", "ARM64": "aarch64"}["".join([i if i in platform.uname()[4] else "" for i in ["X86_64", "AMD64", "ARM64"]])]
+ARCH = {"x86_64": "x64", "X86_64": "x64", "AMD64": "x64", "ARM64": "aarch64"}["".join([i if i in platform.uname()[4] else "" for i in ["x86_64", "X86_64", "AMD64", "ARM64"]])]
 WIDTH = os.get_terminal_size().columns
 
 def _convert_path(sections) -> str:
