@@ -5,6 +5,9 @@ import re
 import subprocess
 import sys
 
+from src.util import *
+from src.microsoft import *
+
 # reminder to self: just copy of launchcraft version, not fixed up yet
 # reminder to self x2: this is python 3.12 there are match case statements now
 
@@ -12,53 +15,39 @@ USERNAME = "TechnoDot"
 UUID = "9a467ecf8eaf4d9cb44050eb9b60581a" # long live my old account
 TOKEN = "eynevergonnagiveyouupnevergonnaletyoudownnevergonnarunaroundanddesertyou"
 
-def parse_rule(rule, options) -> bool:
-    if rule["action"] == "allow": value = False
-    elif rule["action"] == "disallow": value = True
-
-    for os_key, os_value in rule.get("os", {}).items():
-        if os_key == "name":
-            if os_value == "windows" and platform.system() != 'Windows': return value
-            elif os_value == "osx" and platform.system() != 'Darwin': return value
-            elif os_value == "linux" and platform.system() != 'Linux': return value
-        elif os_key == "arch" and os_value == "x86" and platform.architecture()[0] != "32bit": return value
-        elif os_key == "version" and not re.match(os_value, f"{sys.getwindowsversion().major}.{sys.getwindowsversion().minor}" if platform.system() == "Windows" else platform.uname().release): return value
-
-    return not value
-
-def classpath(data, version, directory):
+def classpath(data, version):
     sep = ";" if platform.system() == "Windows" else ":"
-    libraries = ""
+    cp = ""
 
     for library in data["libraries"]:
-        if "rules" in library and (False if any([parse_rule(i, {}) for i in library["rules"]]) else True): continue
+        if "rules" in library and (False if any([parse_rule(i) for i in library["rules"]]) else True): continue
         sections = library["name"].split(":")
-        libraries += f"{directory}/libraries/{'/'.join(sections[0].split('.'))}/{sections[1]}/{sections[2]}/{sections[1]}-{sections[2]}{'-' + sections[3] if 3 < len(sections) else ''}.jar{sep}"
+        cp += os.path.join(root(), convert_path(sections)) + sep
 
-    libraries += f"{directory}/versions/{version}/{version}.jar"
-    return libraries
+    cp += root() / "version" / version / f"{version}.jar"
+    return cp
 
-def jvm_arguments(data, version, directory):
+def jvm_arguments(data, version):
     arguments = []
-    
-    for argument in data["arguments"]["jvm"]:
+
+    for argument in data["aruguments"]["jvm"]:
         if isinstance(argument, dict):
-            if "rules" in argument and (False if any([parse_rule(i, {}) for i in argument["rules"]]) else True): continue
+            if "rules" in argument and (False if any([parse_rule(i) for i in argument["rules"]]) else True): continue
             arguments.append(argument["value"][0])
         else:
             if argument.find("${natives_directory}") != -1:
-                arguments.append(argument.replace("${natives_directory}", f"{directory}/versions/{version}/natives"))
+                arguments.append(argument.replace("${natives_directory}", root() / "versions" / version / "natives"))
             elif argument.find("${launcher_name}") != -1:
-                arguments.append(argument.replace("${launcher_name}", "technolauncher"))
+                arguments.append(argument.replace("${launcher_name}", "technoclient"))
             elif argument.find("${launcher_version}") != -1:
                 arguments.append(argument.replace("${launcher_version}", "1.0"))
             elif argument.find("${classpath}") != -1:
                 arguments.append("-cp")
-                arguments.append(argument.replace("${classpath}", classpath(data, version, directory)))
+                arguments.append(argument.replace("${classpath}", classpath(data, version)))
     
     return arguments
 
-def game_arguments(data, version, directory):
+def game_arguments(data, version):
     arguments = []
     
     for argument in data["arguments"]["game"]:
@@ -71,9 +60,9 @@ def game_arguments(data, version, directory):
         elif argument == "${version_name}":
             arguments[i] = version
         elif argument == "${game_directory}":
-            arguments[i] = f"{directory}/game"
+            arguments[i] = root() / "minecraft"
         elif argument == "${assets_root}":
-            arguments[i] = f"{directory}/assets"
+            arguments[i] = root() / "assets"
         elif argument == "${assets_index_name}":
             arguments[i] = data["assetIndex"]["id"]
         elif argument == "${auth_uuid}":
@@ -86,20 +75,8 @@ def game_arguments(data, version, directory):
             arguments[i] = "release" if version.find(".") != -1 else "snapshot"
 
     return arguments
-def run(directory, version, proxy, java_type="jre"):
-    directory = "/Users/3124224/Library/Application Support/devnolauncher"
-    version = "1.20.4"
 
-    java = {
-        "1.20.4": "21",
-        "1.8.9": "8",
-        "default": "21"
-    }
-
-    try:
-        java_version = java[version]
-    except:
-        java_version = java["default"]
+def run(version, session):
 
     with open(f"{directory}/versions/{version}/{version}.json") as file:
         data = json.load(file)

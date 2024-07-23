@@ -5,41 +5,12 @@ import os
 import platform
 import re
 import shutil
-import sys
 import zipfile
 
 from src.util import *
 
 ARCH = {"X86_64": "x64", "AMD64": "x64", "ARM64": "aarch64"}["".join([i if i in platform.uname()[4] else "" for i in ["X86_64", "AMD64", "ARM64"]])]
 WIDTH = os.get_terminal_size().columns
-
-def _convert_path(sections) -> str:
-    return f"{'/'.join(sections[0].split('.'))}/{sections[1]}/{sections[2]}/{sections[1]}-{sections[2]}{'-' + sections[3] if 3 < len(sections) else ''}.jar"
-
-def _parse_rule(rule) -> bool:
-    if rule["action"] == "allow":
-        value = False
-    elif rule["action"] == "disallow":
-        value = True
-    
-    for k, v in rule.get("os", {}).items():
-        if k == "name":
-            match v:
-                case "windows":
-                    return value if platform.system() != 'Windows' else not value
-                
-                case "osx":
-                    return value if platform.system() != 'Darwin' else not value
-                
-                case "linux":
-                    return value if platform.system() != 'Linux' else not value
-        
-        elif k == "arch" and v == "x86" and platform.architecture()[0] != "32bit":
-            return value
-        elif k == "version" and not re.match(v, f"{sys.getwindowsversion().major}.{sys.getwindowsversion().minor}" if platform.system() == "Windows" else platform.uname().release):
-            return value
-    
-    return not value
 
 def download(data):
     if os.path.exists(data[1]):
@@ -115,19 +86,19 @@ def run(version, session):
     data = []
     natives = []
     for library in library_data:
-        if "rules" in library and (False if any([_parse_rule(i) for i in library["rules"]]) else True): continue
+        if "rules" in library and (False if any([parse_rule(i) for i in library["rules"]]) else True): continue
         sections = library["name"].split(":")
 
         data.append((
             library["downloads"]["artifact"]["url"],
-            os.path.join(root() / "libraries", _convert_path(sections)),
+            os.path.join(root() / "libraries", convert_path(sections)),
             library["downloads"]["artifact"]["sha1"],
             session
         ))
 
         if "native" in library["name"]:
             natives.append((
-                os.path.join(root() / "libraries", _convert_path(sections))
+                os.path.join(root() / "libraries", convert_path(sections))
             ))
 
     delta = 1 / len(data)

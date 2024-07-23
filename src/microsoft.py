@@ -11,7 +11,7 @@ TENANT_ID = "170105bd-9573-4222-b09c-6f24c3b77cd8" # Original tenant ID included
 
 def oauth2_flow(session):
     # TODO: PyQt webview or something
-    print("https://login.live.com/oauth20_authorize.srf?client_id=00000000402B5328&redirect_uri=https://login.live.com/oauth20_desktop.srf&response_type=code&scope=service::user.auth.xboxlive.com::MBI_SSL")
+    print(f"https://login.live.com/oauth20_authorize.srf?client_id={CLIENT_ID}&redirect_uri=https://login.live.com/oauth20_desktop.srf&response_type=code&scope=service::user.auth.xboxlive.com::MBI_SSL")
     code = input("Redirected URL: ").split("code=")[1].split("&")[0]
 
     r = session.post("https://login.live.com/oauth20_token.srf", data={

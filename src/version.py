@@ -55,6 +55,12 @@ def run(version, session):
 
     log("Downloading asset index")
     data = json.load(open(root() / "meta" / "net.minecraft" / f"{v}.json"))["assetIndex"]
-    download(session, data["url"], root() / "assets" / "indexes" / f"{data["id"]}.json", data["sha1"])
+    if download(session, data["url"], root() / "assets" / "indexes" / f"{data["id"]}.json", data["sha1"], quiet=True) != 0:
+        log("Failed to download asset index", "ERROR")
+
+    log("Downloading version JAR")
+    data = json.load(open(root() / "meta" / "com.mojang" / f"{v}.json"))["downloads"]["client"]
+    if download(session, data["url"], root() / "version" / v / f"{v}.jar", data["sha1"], quiet=True) != 0:
+        log("Failed to download version JAR", "ERROR")
 
     log(f"Minecraft metadata for {v} downloaded")
