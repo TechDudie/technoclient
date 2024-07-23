@@ -11,6 +11,7 @@ from src.util import *
 
 ARCH = {"x86_64": "x64", "X86_64": "x64", "AMD64": "x64", "ARM64": "aarch64"}["".join([i if i in platform.uname()[4] else "" for i in ["x86_64", "X86_64", "AMD64", "ARM64"]])]
 WIDTH = os.get_terminal_size().columns
+NATIVE_ID = {"Windows": "windows", "Darwin": "osx", "Linux": "linux"}[platform.system()]
 
 def download(data):
     if os.path.exists(data[1]):
@@ -35,22 +36,18 @@ def verify(data):
         return (int(not hashlib.sha1(file.read()).hexdigest() == data[2]), data)
 
 def extract(data):
-    try: 
-        with zipfile.ZipFile(data[0]) as file:
-            for f in file.namelist():
-                if ARCH not in f: continue
-                if len([i for i in re.finditer("\.", f)]) > 1: continue
+    with zipfile.ZipFile(data) as file:
+        print(f"{data}: {file.namelist()}")
+        for f in file.namelist():
 
-                if f.endswith(os.sep): continue
-                if f.endswith("MF"): continue
-                if f.endswith("LIST"): continue
-                if f.endswith("class"): continue
+            if f.endswith(os.sep): continue
+            if f.endswith("MF"): continue
+            if f.endswith("LIST"): continue
+            if f.endswith("class"): continue
 
-                file.extract(f, root() / "cache" / "natives")
-                shutil.move(os.path.join(root() / "cache" / "natives", f), root() / "versions" / v / "natives" / f.split(os.sep)[-1])
-
-    except FileNotFoundError:
-        return (1, data[0])
+            path = root() / "version" / v / "natives" / f.split(os.sep)[-1]
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            file.extract(f, path)
     
     return (0, data)
 
@@ -86,17 +83,27 @@ def run(version, session):
     data = []
     natives = []
     for library in library_data:
-        if "rules" in library and (False if any([parse_rule(i) for i in library["rules"]]) else True): continue
+        if "rules" in library and False in [parse_rule(i) for i in library["rules"]]: continue
         sections = library["name"].split(":")
 
-        data.append((
-            library["downloads"]["artifact"]["url"],
-            os.path.join(root() / "libraries", convert_path(sections)),
-            library["downloads"]["artifact"]["sha1"],
-            session
-        ))
-
-        if "native" in library["name"]:
+        if "artifact" in library["downloads"]:
+            data.append((
+                library["downloads"]["artifact"]["url"],
+                os.path.join(root() / "libraries", convert_path(sections)),
+                library["downloads"]["artifact"]["sha1"],
+                session
+            ))
+        
+        if "classifiers" in library["downloads"]:
+            id = library["natives"][NATIVE_ID].replace("${arch}", ARCH[-2:])
+            data.append((
+                library["downloads"]["classifiers"][id]["url"],
+                os.path.join(root() / "libraries", convert_path(sections)),
+                library["downloads"]["classifiers"][id]["sha1"],
+                session
+            ))
+        
+        if "natives" in library:
             natives.append((
                 os.path.join(root() / "libraries", convert_path(sections))
             ))
@@ -132,17 +139,20 @@ def run(version, session):
     print()
     
     os.makedirs(os.path.dirname(root() / "version" / v / "natives"), exist_ok=True)
-    delta = 1 / len(natives)
+    try:
+        delta = 1 / len(natives)
 
-    pool = multiprocessing.Pool(multiprocessing.cpu_count())
+        pool = multiprocessing.Pool(multiprocessing.cpu_count())
 
-    i, j = 0, 0
-    for native in natives:
-        pool.apply_async(extract, args=(native, ), callback=extract_callback)
-    
-    pool.close()
-    pool.join()
+        i, j = 0, 0
+        for native in natives:
+            pool.apply_async(extract, args=(native, ), callback=extract_callback)
+        
+        pool.close()
+        pool.join()
 
-    print()
+        print()
+    except ZeroDivisionError:
+        log(f"No natives to extract for {v}", "WARN")
 
     log(f"Minecraft libraries for {v} installed")

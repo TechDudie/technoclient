@@ -1,15 +1,11 @@
 import json
 import os
 import platform
-import re
 import subprocess
-import sys
 
-from src.util import *
+from src.java import get_version
 from src.microsoft import *
-
-# reminder to self: just copy of launchcraft version, not fixed up yet
-# reminder to self x2: this is python 3.12 there are match case statements now
+from src.util import *
 
 USERNAME = "TechnoDot"
 UUID = "9a467ecf8eaf4d9cb44050eb9b60581a" # long live my old account
@@ -24,19 +20,19 @@ def classpath(data, version):
         sections = library["name"].split(":")
         cp += os.path.join(root(), convert_path(sections)) + sep
 
-    cp += root() / "version" / version / f"{version}.jar"
+    cp += str(root() / "version" / version / f"{version}.jar")
     return cp
 
 def jvm_arguments(data, version):
     arguments = []
 
-    for argument in data["aruguments"]["jvm"]:
+    for argument in data["arguments"]["jvm"]:
         if isinstance(argument, dict):
             if "rules" in argument and (False if any([parse_rule(i) for i in argument["rules"]]) else True): continue
             arguments.append(argument["value"][0])
         else:
             if argument.find("${natives_directory}") != -1:
-                arguments.append(argument.replace("${natives_directory}", root() / "versions" / version / "natives"))
+                arguments.append(argument.replace("${natives_directory}", str(root() / "versions" / version / "natives")))
             elif argument.find("${launcher_name}") != -1:
                 arguments.append(argument.replace("${launcher_name}", "technoclient"))
             elif argument.find("${launcher_version}") != -1:
@@ -77,20 +73,26 @@ def game_arguments(data, version):
     return arguments
 
 def run(version, session):
+    v = version.split("-")[0]
 
-    with open(f"{directory}/versions/{version}/{version}.json") as file:
+    _, java_version = get_version(version)
+
+    with open(root() / "meta" / "com.mojang" / f"{v}.json") as file:
         data = json.load(file)
 
     command = [{
-        "Windows": f"{directory}/java/{java_version}/bin/java.exe",
-        "Darwin": f"{directory}/java/{java_version}/zulu-{java_version}.{java_type.lower()}/Contents/Home/bin/java",
-        "Linux": f"{directory}/java/{java_version}/bin/java"
+        "Windows": root() / "java" / java_version / "bin" / "java.exe",
+        "Darwin": root() / "java" / java_version / f"zulu-{java_version}.jre" / "Contents " / "Home" / "bin" / "java",
+        "Linux": root() / "java" / java_version / "bin" / "java"
     }[platform.system()]]
 
-    command += jvm_arguments(data, version, directory)
+    command += jvm_arguments(data, v)
     command.append(data["mainClass"])
-    command += game_arguments(data, version, directory)
+    command += game_arguments(data, v)
 
-    print(f"Launching Minecraft {version}...\n\n{'=' * os.get_terminal_size().columns}\n")
+    print(command)
+
+    log(f"Launching game ({version})")
+    print("=" * 80)
 
     subprocess.run(command)

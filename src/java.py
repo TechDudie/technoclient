@@ -9,7 +9,7 @@ import zipfile
 
 from src.util import *
 
-def install(version, s):
+def get_version(version):
     java_major = 8 if version.split("-")[0] == "1.8.9" else 21
 
     data = json.load(open(root() / "meta" / "com.azul.java" / f"java{java_major}.json"))["runtimes"]
@@ -19,12 +19,17 @@ def install(version, s):
     else:
         azul_version = re.findall(r"\d+.\d+.\d+.\d+", url)[0]
         java_version = re.findall(r"\d+.\d+.\d+", url)[1]
+    
+    return azul_version, java_version
+
+def run(version, s):
+    azul_version, java_version = get_version(version)
 
     log("Retrieving system information")
     
     uname = platform.uname()
     operating_system = {"Windows": "win", "Darwin": "macosx", "Linux": "linux"}[uname[0]]
-    processor_architecture = {"X86_64": "x64", "AMD64": "x64", "ARM64": "aarch64"}["".join([i if i in uname[4] else "" for i in ["X86_64", "AMD64", "ARM64"]])]
+    processor_architecture = {"x86_64": "x64", "X86_64": "x64", "AMD64": "x64", "ARM64": "aarch64"}["".join([i if i in uname[4] else "" for i in ["x86_64", "X86_64", "AMD64", "ARM64"]])]
     url = f"https://cdn.azul.com/zulu/bin/zulu{azul_version}-ca-jre{java_version}-{operating_system}_{processor_architecture}.zip"
     cache = root() / "cache" / f"zulu{azul_version}-ca-jre{java_version}-{operating_system}_{processor_architecture}.zip"
     path = root() / "cache" / "java"

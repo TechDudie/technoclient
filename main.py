@@ -3,6 +3,7 @@ import requests
 
 import src.assets as assets
 import src.libraries as libraries
+import src.launch as launch
 import src.java as java
 import src.server as server
 import src.version as version
@@ -79,10 +80,12 @@ if __name__ == "__main__":
         case "java":
             match args.action:
                 case "install":
-                    java.install(args.version, s)
-
-                case _:
-                    log("Invalid action specified", "ERROR")
+                    java.run(args.version, s)
+        
+        case "launch":
+            match args.action:
+                case "run":
+                    launch.run(args.version, s)
 
         case _:
             log("Invalid module specified", "ERROR")
