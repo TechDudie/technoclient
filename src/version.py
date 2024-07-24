@@ -53,7 +53,7 @@ def run(version, session):
             if download(session, i["url"], path, quiet=True) != 0:
                 log(f"Failed to download version data for {v}", "ERROR")
     
-    log("Downloading modern version data")
+    log("Downloading modern version data") # TODO: because used for arguments, just hardcode the json
     path = root() / "meta" / "manifest.json"
     data = json.load(open(path))["versions"]
     path = root() / "meta" / "com.mojang" / "1.16.5.json"

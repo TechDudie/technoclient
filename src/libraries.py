@@ -12,7 +12,7 @@ from src.util import *
 ARCH = {"x86_64": "x64", "X86_64": "x64", "AMD64": "x64", "ARM64": "aarch64"}["".join([i if i in platform.uname()[4] else "" for i in ["x86_64", "X86_64", "AMD64", "ARM64"]])]
 WIDTH = os.get_terminal_size().columns
 NATIVE_ID = {"Windows": "windows", "Darwin": "osx", "Linux": "linux"}[platform.system()]
-NATIVE_IGNORE = [os.sep, "META-INF", "MF", "LIST", "class", "git", "sha1", "properties", "xml"]
+NATIVE_IGNORE = [os.sep, "META-INF", "MF", "LIST", "class", "git", "sha1", "properties", "xml"] # TODO: change to dictionary of native file extensions by platform instead of which ones to ignore
 
 def download(data):
     if os.path.exists(data[1]):
