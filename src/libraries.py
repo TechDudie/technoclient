@@ -12,6 +12,7 @@ from src.util import *
 ARCH = {"x86_64": "x64", "X86_64": "x64", "AMD64": "x64", "ARM64": "aarch64"}["".join([i if i in platform.uname()[4] else "" for i in ["x86_64", "X86_64", "AMD64", "ARM64"]])]
 WIDTH = os.get_terminal_size().columns
 NATIVE_ID = {"Windows": "windows", "Darwin": "osx", "Linux": "linux"}[platform.system()]
+NATIVE_IGNORE = [os.sep, "META-INF", "MF", "LIST", "class", "git", "sha1", "properties", "xml"]
 
 def download(data):
     if os.path.exists(data[1]):
@@ -37,13 +38,15 @@ def verify(data):
 
 def extract(data):
     with zipfile.ZipFile(data) as file:
-        print(f"{data}: {file.namelist()}")
         for f in file.namelist():
-
-            if f.endswith(os.sep): continue
-            if f.endswith("MF"): continue
-            if f.endswith("LIST"): continue
-            if f.endswith("class"): continue
+            x = False
+            for i in NATIVE_IGNORE:
+                if f.endswith(i):
+                    x = True
+                    break
+            
+            if x:
+                continue
 
             path = root() / "version" / v / "natives" / f.split(os.sep)[-1]
             os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -103,7 +106,7 @@ def run(version, session):
                 session
             ))
         
-        if "natives" in library:
+        if "natives" in library or "native" in library["name"]:
             natives.append((
                 os.path.join(root() / "libraries", convert_path(sections))
             ))
