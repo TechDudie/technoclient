@@ -52,6 +52,15 @@ def run(version, session):
         if i["id"] == v:
             if download(session, i["url"], path, quiet=True) != 0:
                 log(f"Failed to download version data for {v}", "ERROR")
+    
+    log("Downloading modern version data")
+    path = root() / "meta" / "manifest.json"
+    data = json.load(open(path))["versions"]
+    path = root() / "meta" / "com.mojang" / "1.16.5.json"
+    for i in data:
+        if i["id"] == "1.16.5":
+            if download(session, i["url"], path, quiet=True) != 0:
+                log(f"Failed to download version data for 1.16.5", "ERROR")
 
     log("Downloading asset index")
     data = json.load(open(root() / "meta" / "net.minecraft" / f"{v}.json"))["assetIndex"]

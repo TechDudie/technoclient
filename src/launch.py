@@ -18,58 +18,56 @@ def classpath(data, version):
     for library in data["libraries"]:
         if "rules" in library and (False if any([parse_rule(i) for i in library["rules"]]) else True): continue
         sections = library["name"].split(":")
-        cp += os.path.join(root(), convert_path(sections)) + sep
+        cp += os.path.join(root() / "libraries", convert_path(sections)) + sep
 
     cp += str(root() / "version" / version / f"{version}.jar")
     return cp
 
-def jvm_arguments(data, version):
+def jvm_arguments(data, version, modern):
     arguments = []
 
-    for argument in data["arguments"]["jvm"]:
+    for argument in modern["arguments"]["jvm"]:
         if isinstance(argument, dict):
             if "rules" in argument and (False if any([parse_rule(i) for i in argument["rules"]]) else True): continue
             arguments.append(argument["value"][0])
-        else:
-            if argument.find("${natives_directory}") != -1:
-                arguments.append(argument.replace("${natives_directory}", str(root() / "versions" / version / "natives")))
-            elif argument.find("${launcher_name}") != -1:
-                arguments.append(argument.replace("${launcher_name}", "technoclient"))
-            elif argument.find("${launcher_version}") != -1:
-                arguments.append(argument.replace("${launcher_version}", "1.0"))
-            elif argument.find("${classpath}") != -1:
-                arguments.append("-cp")
-                arguments.append(argument.replace("${classpath}", classpath(data, version)))
+    
+    arguments += [f"-D{arg}={str(root() / "versions" / version / "natives")}" for arg in ["java.library.path", "jna.tmpdir", "org.lwjgl.system.SharedLibraryExtractPath", "io.netty.native.workdir"]]
+    
+    arguments += [
+        "-Dminecraft.launcher.brand=technoclient",
+        "-Dminecraft.launcher.version=1.0",
+        "-cp",
+        classpath(data, version)
+    ]
     
     return arguments
 
 def game_arguments(data, version):
-    arguments = []
-    
-    for argument in data["arguments"]["game"]:
-        if not isinstance(argument, dict):
-            arguments.append(argument)
-    
-    for i, argument in enumerate(arguments):
-        if argument == "${auth_player_name}":
-            arguments[i] = USERNAME
-        elif argument == "${version_name}":
-            arguments[i] = version
-        elif argument == "${game_directory}":
-            arguments[i] = root() / "minecraft"
-        elif argument == "${assets_root}":
-            arguments[i] = root() / "assets"
-        elif argument == "${assets_index_name}":
-            arguments[i] = data["assetIndex"]["id"]
-        elif argument == "${auth_uuid}":
-            arguments[i] = UUID
-        elif argument == "${auth_access_token}":
-            arguments[i] = TOKEN
-        elif argument == "${user_type}":
-            arguments[i] = "msa"
-        elif argument == "${version_type}":
-            arguments[i] = "release" if version.find(".") != -1 else "snapshot"
+    arguments = data["minecraftArguments"].split(" ") if "minecraftArguments" in data else []
 
+    if arguments == []:
+        for argument in data["arguments"]["game"]:
+            if not isinstance(argument, dict):
+                arguments.append(argument)
+            else:
+                pass # TODO: implement "features" or whatever
+    
+    replace = {
+        "${auth_player_name}": USERNAME,
+        "${version_name}": version,
+        "${game_directory}": root() / "minecraft",
+        "${assets_root}": root() / "assets",
+        "${assets_index_name}": data["assetIndex"]["id"],
+        "${auth_uuid}": UUID,
+        "${auth_access_token}": TOKEN,
+        "${user_type}": "msa",
+        "${version_type}": "release" if version.find(".") != -1 else "snapshot"
+    }
+
+    for i, argument in enumerate(arguments):
+        if argument in replace:
+            arguments[i] = replace[argument]
+    
     return arguments
 
 def run(version, session):
@@ -79,6 +77,9 @@ def run(version, session):
 
     with open(root() / "meta" / "com.mojang" / f"{v}.json") as file:
         data = json.load(file)
+    
+    with open(root() / "meta" / "com.mojang" / "1.16.5.json") as file:
+        modern_data = json.load(file)
 
     command = [{
         "Windows": root() / "java" / java_version / "bin" / "java.exe",
@@ -86,11 +87,9 @@ def run(version, session):
         "Linux": root() / "java" / java_version / "bin" / "java"
     }[platform.system()]]
 
-    command += jvm_arguments(data, v)
+    command += jvm_arguments(data, v, modern_data)
     command.append(data["mainClass"])
     command += game_arguments(data, v)
-
-    print(command)
 
     log(f"Launching game ({version})")
     print("=" * 80)
