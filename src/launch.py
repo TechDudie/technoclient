@@ -11,6 +11,52 @@ USERNAME = "TechnoDot"
 UUID = "9a467ecf8eaf4d9cb44050eb9b60581a" # long live my old account
 TOKEN = "eynevergonnagiveyouupnevergonnaletyoudownnevergonnarunaroundanddesertyou"
 
+JVM_DATA = [
+    {
+        "rules": [
+            {
+                "action": "allow",
+                "os": {
+                    "name": "osx"
+                }
+            }
+        ],
+        "value": [
+            "-XstartOnFirstThread"
+        ]
+    },
+    {
+        "rules": [
+            {
+                "action": "allow",
+                "os": {
+                    "name": "windows"
+                }
+            }
+        ],
+        "value": "-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump"
+    },
+    {
+        "rules": [
+            {
+                "action": "allow",
+                "os": {
+                    "arch": "x86"
+                }
+            }
+        ],
+        "value": "-Xss1M"
+    },
+    "-Djava.library.path=${natives_directory}",
+    "-Djna.tmpdir=${natives_directory}",
+    "-Dorg.lwjgl.system.SharedLibraryExtractPath=${natives_directory}",
+    "-Dio.netty.native.workdir=${natives_directory}",
+    "-Dminecraft.launcher.brand=${launcher_name}",
+    "-Dminecraft.launcher.version=${launcher_version}",
+    "-cp",
+    "${classpath}"
+]
+
 def classpath(data, version):
     sep = ";" if platform.system() == "Windows" else ":"
     cp = ""
@@ -23,10 +69,10 @@ def classpath(data, version):
     cp += str(root() / "version" / version / f"{version}.jar")
     return cp
 
-def jvm_arguments(data, version, modern):
+def jvm_arguments(data, version):
     arguments = []
 
-    for argument in modern["arguments"]["jvm"]:
+    for argument in JVM_DATA:
         if isinstance(argument, dict):
             if "rules" in argument and (False if any([parse_rule(i) for i in argument["rules"]]) else True): continue
             arguments.append(argument["value"][0])
@@ -77,9 +123,6 @@ def run(version, session):
 
     with open(root() / "meta" / "com.mojang" / f"{v}.json") as file:
         data = json.load(file)
-    
-    with open(root() / "meta" / "com.mojang" / "1.16.5.json") as file:
-        modern_data = json.load(file)
 
     command = [{
         "Windows": root() / "java" / java_version / "bin" / "java.exe",
@@ -87,7 +130,7 @@ def run(version, session):
         "Linux": root() / "java" / java_version / "bin" / "java"
     }[platform.system()]]
 
-    command += jvm_arguments(data, v, modern_data)
+    command += jvm_arguments(data, v)
     command.append(data["mainClass"])
     command += game_arguments(data, v)
 
