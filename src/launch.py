@@ -3,7 +3,6 @@ import os
 import platform
 import subprocess
 
-from src.java import get_version
 from src.microsoft import *
 from src.util import *
 
@@ -46,15 +45,7 @@ JVM_DATA = [
             }
         ],
         "value": "-Xss1M"
-    },
-    "-Djava.library.path=${natives_directory}",
-    "-Djna.tmpdir=${natives_directory}",
-    "-Dorg.lwjgl.system.SharedLibraryExtractPath=${natives_directory}",
-    "-Dio.netty.native.workdir=${natives_directory}",
-    "-Dminecraft.launcher.brand=${launcher_name}",
-    "-Dminecraft.launcher.version=${launcher_version}",
-    "-cp",
-    "${classpath}"
+    }
 ]
 
 def classpath(data, version):
@@ -73,9 +64,8 @@ def jvm_arguments(data, version):
     arguments = []
 
     for argument in JVM_DATA:
-        if isinstance(argument, dict):
-            if "rules" in argument and (False if any([parse_rule(i) for i in argument["rules"]]) else True): continue
-            arguments.append(argument["value"][0])
+        if "rules" in argument and (False if any([parse_rule(i) for i in argument["rules"]]) else True): continue
+        arguments.append(argument["value"])
     
     arguments += [f"-D{arg}={str(root() / "versions" / version / "natives")}" for arg in ["java.library.path", "jna.tmpdir", "org.lwjgl.system.SharedLibraryExtractPath", "io.netty.native.workdir"]]
     
@@ -119,7 +109,7 @@ def game_arguments(data, version):
 def run(version, session):
     v = version.split("-")[0]
 
-    _, java_version = get_version(version)
+    _, java_version, _ = get_java_version(version)
 
     with open(root() / "meta" / "com.mojang" / f"{v}.json") as file:
         data = json.load(file)

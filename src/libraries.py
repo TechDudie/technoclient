@@ -12,7 +12,7 @@ from src.util import *
 ARCH = {"x86_64": "x64", "X86_64": "x64", "AMD64": "x64", "ARM64": "aarch64"}["".join([i if i in platform.uname()[4] else "" for i in ["x86_64", "X86_64", "AMD64", "ARM64"]])]
 WIDTH = os.get_terminal_size().columns
 NATIVE_ID = {"Windows": "windows", "Darwin": "osx", "Linux": "linux"}[platform.system()]
-NATIVE_IGNORE = [os.sep, "META-INF", "MF", "LIST", "class", "git", "sha1", "properties", "xml"] # TODO: change to dictionary of native file extensions by platform instead of which ones to ignore
+NATIVE_EXTENSION = {"Windows": ".dll", "Darwin": ".dylib", "Linux": ".so"}[platform.system()]
 
 def download(data):
     if os.path.exists(data[1]):
@@ -37,20 +37,17 @@ def verify(data):
         return (int(not hashlib.sha1(file.read()).hexdigest() == data[2]), data)
 
 def extract(data):
-    with zipfile.ZipFile(data) as file:
+    with zipfile.ZipFile(data[0]) as file:
         for f in file.namelist():
-            x = False
-            for i in NATIVE_IGNORE:
-                if f.endswith(i):
-                    x = True
-                    break
-            
-            if x:
+            if NATIVE_ID == "windows" and f.find("x86") and f.find("arm64") != -1: # temporary thing
                 continue
 
-            path = root() / "version" / v / "natives" / f.split(os.sep)[-1]
-            os.makedirs(os.path.dirname(path), exist_ok=True)
-            file.extract(f, path)
+            if f.endswith(NATIVE_EXTENSION):
+                path = root() / "version" / data[1] / "natives" / f.split("/")[-1]
+                cache = root() / "cache" / "natives" / data[1]
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                file.extract(f, cache)
+                shutil.move(os.path.join(cache, f), root() / "version" / data[1] / "natives" / f.split("/")[-1])
     
     return (0, data)
 
@@ -108,7 +105,8 @@ def run(version, session):
         
         if "natives" in library or "native" in library["name"]:
             natives.append((
-                os.path.join(root() / "libraries", convert_path(sections))
+                os.path.join(root() / "libraries", convert_path(sections)),
+                v
             ))
 
     delta = 1 / len(data)

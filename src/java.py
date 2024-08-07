@@ -1,29 +1,14 @@
 import hashlib
-import json
 import os
 import platform
-import re
 import shutil
 import subprocess
 import zipfile
 
 from src.util import *
 
-def get_version(version):
-    java_major = 8 if version.split("-")[0] == "1.8.9" else 21
-
-    data = json.load(open(root() / "meta" / "com.azul.java" / f"java{java_major}.json"))["runtimes"]
-    url = data[0]["url"]
-    if java_major != 8:
-        azul_version, java_version = re.findall(r"\d+.\d+.\d+", url)
-    else:
-        azul_version = re.findall(r"\d+.\d+.\d+.\d+", url)[0]
-        java_version = re.findall(r"\d+.\d+.\d+", url)[1]
-    
-    return azul_version, java_version
-
 def run(version, s):
-    azul_version, java_version = get_version(version)
+    azul_version, java_version, data = get_java_version(version)
 
     log("Retrieving system information")
     
